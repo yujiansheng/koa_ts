@@ -53,7 +53,7 @@
       "<rootDir>/node_modules/"
     ],
     "roots": [
-      "<rootDir>/__teests__"
+      "<rootDir>/__tests__"
     ],
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
