@@ -4,6 +4,7 @@ import cors from "koa2-cors";
 import logger from "koa-logger";
 
 import healthcheckRoutes from "./routes/healthcheck";
+import codeReviewVideosRoutes from "./routes/codereviewvideos";
 import { config } from "./config";
 
 const app = new Koa();
@@ -23,6 +24,7 @@ app.use(async (ctx, next) => {
 });
 
 app.use(healthcheckRoutes.routes());
+app.use(codeReviewVideosRoutes.routes());
 
 const server = app
   .listen(PORT, async () => {
