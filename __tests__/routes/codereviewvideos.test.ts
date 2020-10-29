@@ -1,5 +1,8 @@
 import server from "../../src/server";
 import request from "supertest";
+import * as storage from "../../src/storage/redis";
+
+jest.mock("../../src/storage/redis.ts");
 
 afterEach(done => {
   server.close();
@@ -7,10 +10,23 @@ afterEach(done => {
 });
 
 describe("router/codereviewvideos", () => {
-  const games = ["World of Warships", "Battlefield"];
+  const games = [
+    "World of Warships"
+    //   "Battlefield"
+  ];
 
   games.forEach((game: string) => {
-    it(`should allow adding a game to the list - ${game}`, async () => {
+    it.only(`should allow adding a game to the list - ${game}`, async () => {
+      const mockGet = jest.fn((list: string) => Promise.resolve([game]));
+
+      storage.redisStorage = jest.fn(() => {
+        return {
+          get: mockGet,
+          add: (list: string) => Promise.resolve(false),
+          remove: (list: string) => Promise.resolve(false)
+        };
+      });
+
       const response = await request(server)
         .post("/codereviewvideos")
         .send({ game });
@@ -20,6 +36,11 @@ describe("router/codereviewvideos", () => {
       expect(response.body).toEqual({
         games: [game]
       });
+
+      expect(mockGet).toHaveBeenCalled();
+
+      expect(storage.add).toHaveBeenCalledTimes(2);
+      expect(storage.get).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -47,7 +68,7 @@ describe("router/codereviewvideos", () => {
     });
   });
 
-  it.only("should return a validation failure if the game data is incorrect", async () => {
+  it("should return a validation failure if the game data is incorrect", async () => {
     const response = await request(server)
       .post("/codereviewvideos")
       .send({ game: "" });
